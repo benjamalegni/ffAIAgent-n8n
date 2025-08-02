@@ -14,9 +14,9 @@ services:
       - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://n8n-financial-feeling.railway.app
+      - WEBHOOK_URL=${WEBHOOK_URL}
       - GENERIC_TIMEZONE=America/New_York
-      - N8N_ENCRYPTION_KEY=tu_clave_de_encriptacion_segura_32_caracteres
+      - N8N_ENCRYPTION_KEY=financialfeeling2024encryptionkey32
       - N8N_USER_MANAGEMENT_DISABLED=false
       - N8N_DIAGNOSTICS_ENABLED=false
       - N8N_HIRING_BANNER_ENABLED=false
@@ -24,12 +24,6 @@ services:
       - N8N_ONBOARDING_FLOW_DISABLED=true
     volumes:
       - n8n_data:/home/node/.n8n
-    networks:
-      - n8n_network
 
 volumes:
-  n8n_data:
-
-networks:
-  n8n_network:
-    driver: bridge
+  n8n_data: 
