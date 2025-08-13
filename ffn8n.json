@@ -1,5 +1,5 @@
 {
-  "name": "marketAgent",
+  "name": "My workflow",
   "nodes": [
     {
       "parameters": {
@@ -9,98 +9,23 @@
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.2,
       "position": [
-        880,
-        2080
+        -128,
+        288
       ],
-      "id": "68156e0c-b9a5-4828-bcc8-db4338d6ca45",
+      "id": "2f79b29c-a717-481b-95a2-1d5688a191f3",
       "name": "RSS Read"
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.output }}",
-        "hasOutputParser": true,
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2,
-      "position": [
-        1984,
-        2080
-      ],
-      "id": "801d5549-b99a-4355-80d5-5748f8495453",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "gpt-3.5-turbo",
-          "mode": "list",
-          "cachedResultName": "gpt-3.5-turbo"
-        },
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.2,
-      "position": [
-        1840,
-        2368
-      ],
-      "id": "a09c6e14-7805-434c-aedb-960fb04ccbfa",
-      "name": "OpenAI Chat Model",
-      "credentials": {
-        "openAiApi": {
-          "id": "wO8bdhwT4eZHSpl6",
-          "name": "OpenAi account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "modelName": "models/gemini-1.5-flash",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        1952,
-        2272
-      ],
-      "id": "d95f7737-6323-4eab-9938-2222c26f7656",
-      "name": "Google Gemini Chat Model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "4ZmPZkhmCsEOv3z6",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "sessionIdType": "customKey",
-        "sessionKey": "123"
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.3,
-      "position": [
-        2304,
-        2464
-      ],
-      "id": "266c9298-6410-473c-9d53-02cd1d52f442",
-      "name": "Simple Memory"
-    },
-    {
-      "parameters": {
-        "maxItems": 2
+        "maxItems": 15
       },
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
       "position": [
-        1104,
-        2080
+        96,
+        288
       ],
-      "id": "41f4d770-6785-4bfc-9b53-8390d8d6a993",
+      "id": "9ebc3f29-556c-4db5-a8d5-de32e0b37d9a",
       "name": "Limit"
     },
     {
@@ -110,23 +35,23 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1312,
-        1952
+        304,
+        160
       ],
-      "id": "460b737f-63f7-4620-863c-140257f2905b",
+      "id": "463b4467-4c6e-4bf8-b008-ff095e461499",
       "name": "Code"
     },
     {
       "parameters": {
-        "jsCode": "const raw = $(\"AI Agent\").last().json.output;\n\n// 1. Limpiar encabezados como \"Here is your JSON:\"\nlet clean = raw.replace(/^(Here is (your )?(the )?(valid )?JSON(:)?)/i, '').trim();\n\n// 2. Quitar delimitadores de bloque Markdown (```)\nclean = clean\n  .replace(/^```(?:json|markdown)?\\n?/i, '')   // inicio ```json\n  .replace(/\\n?```$/g, '')                     // cierre ```\n\n// 3. Extraer solo el contenido JSON hasta el último cierre de llave\nconst endIndex = clean.lastIndexOf('}');\nif (endIndex !== -1) {\n  clean = clean.slice(0, endIndex + 1);\n} else {\n  throw new Error(\"No se encontró el cierre del JSON (`}`)\");\n}\n\n// 4. Parsear el JSON\nlet parsed;\ntry {\n  parsed = JSON.parse(clean);\n} catch (err) {\n  throw new Error(\"Error al parsear JSON limpio: \" + err.message + \"\\nContenido:\\n\" + clean);\n}\n\nreturn [{ json: parsed }];\n"
+        "jsCode": "\nlet raw = $(\"AI Agent\").last().json.text\n       ?? $(\"AI Agent\").last().json.output\n       ?? $(\"AI Agent\").last().json.completion\n       ?? \"\";\n\n// 1. Limpiar encabezados como \"Here is your JSON:\"\nlet clean = raw.replace(/^(Here is (your )?(the )?(valid )?JSON(:)?)/i, '').trim();\n\n// 2. Quitar delimitadores de bloque Markdown (```)\nclean = clean\n  .replace(/^```(?:json|markdown)?\\n?/i, '')   // inicio ```json\n  .replace(/\\n?```$/g, '')                     // cierre ```\n\n// 3. Extraer solo el contenido JSON hasta el último cierre de llave\nconst endIndex = clean.lastIndexOf('}');\nif (endIndex !== -1) {\n  clean = clean.slice(0, endIndex + 1);\n} else {\n  throw new Error(\"No se encontró el cierre del JSON (`}`)\");\n}\n\n// 4. Parsear el JSON\nlet parsed;\ntry {\n  parsed = JSON.parse(clean);\n} catch (err) {\n  throw new Error(\"Error al parsear JSON limpio: \" + err.message + \"\\nContenido:\\n\" + clean);\n}\n\nreturn [{ json: parsed }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2368,
-        2064
+        1392,
+        288
       ],
-      "id": "65dce3e2-4c83-406e-b01c-77d7fa9b8894",
+      "id": "98eba02a-abf1-4327-b213-4d27a9a4212f",
       "name": "md to json"
     },
     {
@@ -136,10 +61,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2032,
-        1760
+        1024,
+        -32
       ],
-      "id": "6d9e074c-363c-416f-8428-65a9367bb803",
+      "id": "d8ffa3f0-a0ea-42d9-9bc4-37b0809c0e68",
       "name": "json to md"
     },
     {
@@ -149,25 +74,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2272,
-        1760
-      ],
-      "id": "078e1e9f-9cfb-484a-b6ce-efdc58447ed3",
-      "name": "mergeAssets-to-Message"
-    },
-    {
-      "parameters": {
-        "fieldToSplitOut": "sources",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
-      "position": [
         1264,
-        1728
+        -32
       ],
-      "id": "18425323-0b64-477c-a8e5-6f7e28bd12b2",
-      "name": "Split Out2"
+      "id": "bcfb6ff0-d9bc-4aca-bd60-c0aaa3d6df66",
+      "name": "mergeAssets-to-Message"
     },
     {
       "parameters": {
@@ -179,10 +90,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        496,
-        2304
+        -512,
+        512
       ],
-      "id": "db53c085-8fab-435f-a520-ed1493d4c0d1",
+      "id": "edd44933-1ac4-40c5-87ec-058a5c56da52",
       "name": "Webhook",
       "webhookId": "be1d19f2-87cd-46be-a80f-451e7747ef22"
     },
@@ -193,7 +104,7 @@
             {
               "id": "135e343f-dc5b-4b1e-b199-347b2838f4eb",
               "name": "sources",
-              "value": "[\"https://rss.app/feeds/xGkJtQLoM7xfgpDN.xml\"]",
+              "value": "[\"https://rss.app/feeds/ZJW3cBackpq4yzlF.xml\",\"https://rss.app/feeds/tgMCu0kHzk05QAtP.xml\"]",
               "type": "array"
             }
           ]
@@ -203,21 +114,31 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        864,
-        1584
+        -112,
+        -64
       ],
-      "id": "2d3b841e-5740-4b50-a675-c37a87e8dbc8",
+      "id": "28f9dd16-e47f-4021-aa41-61eed969ebda",
       "name": "sources"
     },
     {
-      "parameters": {},
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "clashHandling": {
+            "values": {
+              "resolveClash": "preferInput1"
+            }
+          }
+        }
+      },
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1376,
-        2176
+        368,
+        384
       ],
-      "id": "333a9462-5e2d-4484-9e20-566462994939",
+      "id": "0b02193e-b10b-496d-bd4c-64847a7592ff",
       "name": "Merge"
     },
     {
@@ -238,24 +159,98 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        2656,
-        2208
+        1648,
+        416
       ],
-      "id": "6137fc7d-d4c6-4414-963d-307bd42727d1",
+      "id": "cb6de82e-fe05-45a5-bba8-ab585f23bc84",
       "name": "Respond to Webhook"
     },
     {
       "parameters": {
-        "jsCode": "const prompt = `You are a critical-thinking senior financial analyst.\nAnalyze the following financial news excerpt and extract structured insights in valid JSON format only.\n\nYour task:\n- Wrap output in forecast attribute\n- Identify only financial assets directly affected by the news\n- For each affected market, return: \"impact\", \"news\", \"reason\", \"horizon\"\n- Respond strictly in JSON format only — no additional explanation or commentary - no empty json\n- Do not use special characters that might break the JSON\n- Do not include unaffected or speculative markets\n\nassets to analyze:\n`\n\n\nconst ex = `. OUTPUT FORMAT EXAMPLE:\n{\"forecast\":{\n    \"S&P500\": {\n      \"impact\": \"negative\",\n      \"news\": \"Federal Reserve announces...\",\n      \"reason\": \"Higher interest rates increase borrowing costs...\",\n      \"horizon\": \"short\"\n    },\n    \"Gold\": {\n      \"impact\": \"positive\", \n      \"news\": \"Geopolitical tensions escalate as trade war intensifies\",\n      \"reason\": \"Trade war uncertainty drives investors...\",\n      \"horizon\": \"medium\"\n    }\n  }\n}\"`\n\nlet output = prompt.concat($input.first().json.body.stocks).concat(ex)\n\n\n\nreturn [\n  {\n    json: {\n      output\n    }\n  }\n];"
+        "jsCode": "const prompt = `You are a senior financial analyst.\nGiven the following news, return only affected assets in valid JSON format.\n\nInstructions:\n- Wrap output inside a \"forecast\" object.\n- For each affected asset, return: \"impact\", \"news\", \"reason\", \"horizon\".\n- Only include directly affected assets (no speculation).\n- Strict JSON only, no explanation or extra text.\n- Avoid special characters that break JSON.\n\nAssets to analyze:\n`\nconst ex = `. OUTPUT FORMAT EXAMPLE:\n{\"forecast\": {\n  \"S&P500\": {\n    \"impact\": \"negative\",\n    \"news\": \"Federal Reserve announces...\",\n    \"reason\": \"Higher rates increase borrowing costs...\",\n    \"horizon\": \"short\"\n  },\n  \"Gold\": {\n    \"impact\": \"positive\",\n    \"news\": \"Geopolitical tensions escalate...\",\n    \"reason\": \"Investors seek safe haven...\",\n    \"horizon\": \"medium\"\n  }\n}}`\n\nlet output = prompt.concat($input.first().json.noticiasTexto).concat(ex)\n$input.first().json.noticiasTexto\nreturn [\n  {\n    json: {\n      output\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1584,
-        2176
+        576,
+        384
       ],
-      "id": "71984737-d25b-4b4a-bf34-1c4e3d8eb605",
-      "name": "Code1"
+      "id": "8d698c85-2011-44dc-aeaa-65d3fc224c5a",
+      "name": "prompt"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "sources",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -64
+      ],
+      "id": "6b8e0ae5-3b1c-4de9-bf50-44b003ee1a85",
+      "name": "Split sources"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        784,
+        384
+      ],
+      "id": "c1f800fb-59b2-40b7-9ffc-c166df360f27",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        736,
+        592
+      ],
+      "id": "e1a424c5-2f30-488f-a66e-c063878e1f55",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "QDFBqmlQVGof7x9S",
+          "name": "OpenAi account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        864,
+        592
+      ],
+      "id": "22b7d954-46a7-4292-a7f6-a5d80cf0ebc9",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Ae4ojL3g1d80n3UI",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -266,44 +261,6 @@
           {
             "node": "Limit",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Agent": {
-      "main": [
-        [
-          {
-            "node": "md to json",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "OpenAI Chat Model": {
-      "ai_languageModel": [
-        []
-      ]
-    },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Memory": {
-      "ai_memory": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_memory",
             "index": 0
           }
         ]
@@ -353,22 +310,6 @@
         ]
       ]
     },
-    "mergeAssets-to-Message": {
-      "main": [
-        []
-      ]
-    },
-    "Split Out2": {
-      "main": [
-        [
-          {
-            "node": "RSS Read",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Webhook": {
       "main": [
         [
@@ -389,7 +330,7 @@
       "main": [
         [
           {
-            "node": "Split Out2",
+            "node": "Split sources",
             "type": "main",
             "index": 0
           }
@@ -400,19 +341,57 @@
       "main": [
         [
           {
-            "node": "Code1",
+            "node": "prompt",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code1": {
+    "prompt": {
       "main": [
         [
           {
             "node": "AI Agent",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split sources": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "md to json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -423,11 +402,11 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "663c709a-508f-4da2-8258-5e370d31e242",
+  "versionId": "d714e0aa-c6f0-4bf8-9b40-5f1ca35469e9",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "c01ba27cceeb0576de0dc69a9a9035e6a56f00ff96c018dae458356ce26ee17f"
+    "instanceId": "307b4d5a47f2500169f892fb02f9bfc5a9821d89acc51136deaf73eb28768127"
   },
-  "id": "Bf2QFjBVdKLa1IZ5",
+  "id": "pdyffYq6hfPaWE4k",
   "tags": []
 }
